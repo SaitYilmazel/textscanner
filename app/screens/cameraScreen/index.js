@@ -9,51 +9,44 @@ import IconSearch from 'react-native-vector-icons/Fontisto';
 import IconImage from 'react-native-vector-icons/Ionicons';
 import ZoomView from './../../components/ZoomView';
 
-const IS_IOS = Platform.OS == 'ios';
-const MAX_ZOOM = 8; // iOS only
-const ZOOM_F = IS_IOS ? 0.01 : 0.1;
-const zoom = 0;
-
 class CameraScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
       torchon: 'off',
-      zoom1: 0
     };
   };
 
   render() {
     return (
-      <View style={styles.container}>
-        <RNCamera
-          ref={ref => {
-            this.camera = ref;
-          }}
-          style={styles.preview}
-          type={RNCamera.Constants.Type.back}
-          flashMode={this.state.torchon}
-          useNativeZoom={true}
-          zoom={zoom}
-          maxZoom={MAX_ZOOM}
-          androidCameraPermissionOptions={{
-            title: 'Permission to use camera',
-            message: 'We need your permission to use your camera',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}
-          androidRecordAudioPermissionOptions={{
-            title: 'Permission to use audio recording',
-            message: 'We need your permission to use your audio',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}
-        >
-          <ZoomView style={{flex:1}}
-            onPinchEnd={this.onPinchEnd(this)}
-            onPinchStart={this.onPinchStart(this)}
-            onPinchProgress={this.onPinchProgress(this)}>
-            <View style={{ flexDirection: 'row',flex:1 }}>
+      <ZoomView
+        onPinchStart={() => { }}
+        onPinchEnd={() => { }}
+        onPinchProgress={zoom => this.setState({ zoom })}>
+        <View style={styles.container}>
+          <RNCamera
+            ref={ref => {
+              this.camera = ref;
+            }}
+            style={styles.preview}
+            type={RNCamera.Constants.Type.back}
+            flashMode={this.state.torchon}
+            useNativeZoom={true}
+            zoom={this.state.zoom}
+            androidCameraPermissionOptions={{
+              title: 'Permission to use camera',
+              message: 'We need your permission to use your camera',
+              buttonPositive: 'Ok',
+              buttonNegative: 'Cancel',
+            }}
+            androidRecordAudioPermissionOptions={{
+              title: 'Permission to use audio recording',
+              message: 'We need your permission to use your audio',
+              buttonPositive: 'Ok',
+              buttonNegative: 'Cancel',
+            }}
+          >
+            <View style={{ flexDirection: 'row', flex: 1 }}>
               <TouchableOpacity style={{ marginLeft: 15, marginTop: 15 }} onPress={() => this.toggleTorch()}>
                 {this.state.torchon == RNCamera.Constants.FlashMode.torch ? (
                   <Icon name={'flash'} size={26} color={'white'} />
@@ -81,7 +74,7 @@ class CameraScreen extends Component {
                   <IconSearch name={'zoom'} size={20} color={'white'} />
                   <IconLight name={'minus'} color size={12} style={{ borderRadius: 5, top: 1.5, left: 2, position: 'absolute', backgroundColor: 'white', }} color={'black'} />
                 </View>
-                <Slider thumbTintColor={'#303F9F'} maximumTrackTintColor={'white'} minimumTrackTintColor={'white'} style={{ width: 100 }} minimumValue={0} maximumValue={1} step={0.1} value={this.state.zoomSliderValue} onValueChange={(zoomSliderValue) => this.setState({ zoomSliderValue })} />
+                <Slider thumbTintColor={'#303F9F'} maximumTrackTintColor={'white'} minimumTrackTintColor={'white'} style={{ width: 100 }} minimumValue={0} maximumValue={1} step={0.1} value={this.state.zoom} onValueChange={(zoom) => this.setState({ zoom })} />
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                   <IconSearch name={'zoom'} size={20} color={'white'} />
                   <IconLight name={'plus'} size={12} style={{ borderRadius: 5, left: 2, top: 1.5, position: 'absolute', backgroundColor: 'white' }} color={'black'} />
@@ -93,37 +86,11 @@ class CameraScreen extends Component {
                 <Icon name="camera-iris" size={60} color={'white'} />
               </TouchableOpacity>
             </View>
-          </ZoomView>
-        </RNCamera>
-      </View>
+          </RNCamera>
+        </View>
+      </ZoomView>
     )
   };
-
-  onPinchProgress = (p) => {
-    let p2 = p - this._prevPinch;
-
-    if(p2 > 0 && p2 > ZOOM_F){
-      this._prevPinch = p;
-      this.setState({zoom: Math.min(zoom + ZOOM_F, 1)})
-    }
-    else if (p2 < 0 && p2 < -ZOOM_F){
-      this._prevPinch = p;
-      this.setState({zoom: Math.max(zoom - ZOOM_F, 0)})
-    }
-    console.log("onPinchProgress");
-  }
-
-  onPinchStart = () => {
-    this._prevPinch = 1;
-    console.log("onPinchStart");
-
-  }
-
-  onPinchEnd = () => {
-    this._prevPinch = 1;
-    console.log("onPinchEnd");
-  }
-
 
   takePicture = async () => {
     if (this.camera) {
